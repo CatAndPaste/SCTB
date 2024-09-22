@@ -34,7 +34,7 @@ def subscription_keyboard(language_code, renew=False):
         buttons.append([types.InlineKeyboardButton(text=locale["subscription_option_extend"], callback_data="extend_subscription")])
     return types.InlineKeyboardMarkup(inline_keyboard=buttons)
 
-@router.callback_query(Text(startswith='subscribe_'))
+@router.callback_query(lambda c: c.data.startswith('subscribe_'))
 async def subscription_callback(callback_query: types.CallbackQuery):
     action = callback_query.data.split('_')[1]
     async with get_session() as session:

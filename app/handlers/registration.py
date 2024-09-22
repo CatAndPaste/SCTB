@@ -2,7 +2,6 @@ from aiogram import Router, types, F
 from aiogram.types import ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-from aiogram.utils.formatting import Text
 
 from app.models import User
 from app.utils.locale import load_locale
@@ -14,7 +13,7 @@ router = Router()
 class Registration(StatesGroup):
     waiting_for_api_key = State()
 
-@router.callback_query(Text(startswith='lang_'))
+@router.callback_query(lambda c: c.data.startswith('lang_'))
 async def language_callback(callback_query: types.CallbackQuery, state: FSMContext):
     language_code = callback_query.data.split('_')[1]
     async with get_session() as session:
