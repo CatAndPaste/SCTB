@@ -49,6 +49,8 @@ async def set_user_commands(bot, user_id, language_code, has_subscription):
     """
     Устанавливает команды для конкретного пользователя в зависимости от наличия подписки.
     """
+    print(user_id)
+    print(has_subscription)
     if has_subscription:
         commands = commands_ru if language_code == 'ru' else commands_en
     else:
