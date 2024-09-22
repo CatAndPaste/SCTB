@@ -23,7 +23,6 @@ services:
     depends_on:
       - postgres
     volumes:
-      - .:/app
       - /etc/letsencrypt/live/${DOMAIN_NAME}:/etc/letsencrypt/live/${DOMAIN_NAME}:ro
       - /etc/letsencrypt/archive/${DOMAIN_NAME}:/etc/letsencrypt/archive/${DOMAIN_NAME}:ro
     healthcheck:
