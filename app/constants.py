@@ -1,0 +1,68 @@
+CALLBACK_RETURN = "return"
+CALLBACK_PLACEHOLDER = "placeholder"
+CALLBACK_START = "proceed"
+
+CALLBACK_TEXT = "text"
+CALLBACK_IMAGE = "img"
+CALLBACK_MUSIC = "music"
+CALLBACK_PROFILE = "profile"
+CALLBACK_HELP = "help"
+
+CALLBACK_SHOP = "shop"
+CALLBACK_SHOP_PKGS = "shop_pkgs"
+CALLBACK_SHOP_ITEM = "shopitem"
+CALLBACK_SHOP_PAYMENT = "dopay"
+
+CALLBACK_EMAIL_CANCEL = "email_cancel"
+
+CALLBACK_CONTACT_US = "contact"
+CALLBACK_HELP_PAGE = "help_page_"
+
+CALLBACK_MODEL_GPT3 = "4_mini"
+CALLBACK_MODEL_GPT4 = "4o"
+
+CALLBACK_CONTEXT = "ctx_len"
+CALLBACK_CLEAR_TEXT_CONTEXT = "clear_context"
+
+CALLBACK_MODEL_MJ = "mj"
+CALLBACK_MODEL_DALLE = "dalle"
+CALLBACK_MODEL_SD = "stable_diffusion"
+
+CALLBACK_AR_1_1 = "ar_1_1"
+CALLBACK_AR_9_16 = "ar_9_16"
+CALLBACK_AR_16_9 = "ar_16_9"
+
+CALLBACK_MJ_RELAX = "mj_relax"
+CALLBACK_MJ_FAST = "mj_fast"
+CALLBACK_MJ_TURBO = "mj_turbo"
+
+CALLBACK_MJ_REROLL = "mj_reroll"
+CALLBACK_MJ_LEFT = "mj_left"
+CALLBACK_MJ_RIGHT = "mj_right"
+CALLBACK_MJ_V = "mj_vary"
+CALLBACK_MJ_U = "mj_upscale"
+
+CALLBACK_PAY_CANCEL = "cancel_pay"
+CALLBACK_PAY_STARS_SUB = "pay_stars"
+CALLBACK_PAY_YM_SUB = "pay_ym"
+CALLBACK_PAY_STARS_PACK = "stars_pack"
+CALLBACK_PAY_YM_PACK = "ym_pack"
+
+CALLBACK_SUB_BASE = "sub_"
+CALLBACK_MICRO_SUB = "sub_1"
+CALLBACK_STANDARD_SUB = "sub_2"
+CALLBACK_PRO_SUB = "sub_3"
+
+CALLBACK_PACKAGE_BASE = "pkg_"
+CALLBACK_SMALL_PACK = "pkg_"
+CALLBACK_MEDIUM_PACK = "pkg_"
+CALLBACK_LARGE_PACK = "pkg_"
+CALLBACK_DISABLE_AD = "disable_ad"
+CALLBACK_PACKAGES_SHOP = "pkgs_shop"
+
+CALLBACK_PROMO_PROFILE = "promo_profile"
+CALLBACK_PROMO_SUB = "promo_sub"
+CALLBACK_PROMO_SHOP = "promo_shop"
+
+CALLBACK_MJ_SAVE = "mj_save"
+CALLBACK_MJ_SAVE_ALL = "mj_save_all"

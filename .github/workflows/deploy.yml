@@ -1,0 +1,57 @@
+name: Deploy Telegram Bot
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      DEPLOY_SERVER_IP: 65.108.146.121
+      SERVER_USER: github
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Add known hosts
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+    - name: Copy files via SSH
+      run: |
+        scp -r * ${{ env.SERVER_USER }}@${{ env.DEPLOY_SERVER_IP }}:/srv/sctb
+
+    - name: Check Docker Installation
+      run: |
+        ssh ${{ env.SERVER_USER }}@${{ env.DEPLOY_SERVER_IP }} <<'EOF'
+          if ! command -v docker &> /dev/null; then
+            curl -fsSL https://get.docker.com -o get-docker.sh &&
+            sh get-docker.sh &&
+            sudo usermod -aG docker $USER;
+          fi
+        EOF
+
+    - name: Check Docker Compose Installation
+      run: |
+        ssh ${{ env.SERVER_USER }}@${{ env.DEPLOY_SERVER_IP }} <<'EOF'
+          if ! command -v docker-compose &> /dev/null; then
+            sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep -oP 'tag_name": "\K(.*)(?=")')/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose &&
+            sudo chmod +x /usr/local/bin/docker-compose;
+          fi
+        EOF
+
+    - name: Restart containers
+      run: ssh ${{ env.SERVER_USER }}@${{ env.DEPLOY_SERVER_IP }} 'cd /srv/sctb && docker-compose down && docker-compose up -d --build'
