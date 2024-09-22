@@ -11,9 +11,9 @@
     "subscription_thank_you": "Thank you for purchasing the subscription! Days remaining: {days}",
     "subscription_expiring": "Your subscription expires in {days} days. Please consider renewing it.",
     "subscription_expired": "Your subscription has expired. Commands have been reset.",
-    "subscription_option_service": "Purchase via Service",
-    "subscription_option_stars": "Purchase with Telegram Stars",
-    "subscription_option_direct": "Direct Payment",
+    "subscription_option_service": "Cryptocurrencies (50 USDT)",
+    "subscription_option_stars": "Telegram Stars (5,000 ⭐)",
+    "subscription_option_direct": "Direct Payment (50 USDT)",
     "subscription_option_extend": "Extend Subscription",
     "welcome_back": "Welcome back!",
     "autobuy_message": "Placeholder: Autobuy feature is not implemented yet.",
@@ -28,5 +28,6 @@
     "buy_instruction": "Please enter the amount to buy in USDT.",
     "parameter_updated": "Parameter updated successfully.",
     "parameters_reset": "Parameters have been reset to default.",
-    "parameters_prompt": "Parameters:\n1. Purchase amount (USDT): {purchase_amount}\n2. Profit percentage: {profit_percentage}%\n3. Purchase delay: {purchase_delay} seconds\n4. Growth percentage: {growth_percentage}%\n5. Fall percentage: {fall_percentage}%\n6. Autobuy on growth: {autobuy_on_growth}\n7. Autobuy on fall: {autobuy_on_fall}\n\nEnter the number of the parameter you want to change, or type 'reset' to reset to default."
+    "parameters_prompt": "Parameters:\n1. Purchase amount (USDT): {purchase_amount}\n2. Profit percentage: {profit_percentage}%\n3. Purchase delay: {purchase_delay} seconds\n4. Growth percentage: {growth_percentage}%\n5. Fall percentage: {fall_percentage}%\n6. Autobuy on growth: {autobuy_on_growth}\n7. Autobuy on fall: {autobuy_on_fall}\n\nEnter the number of the parameter you want to change, or type 'reset' to reset to default.",
+    "subscription_option_test": "Get a test subscription"
 }

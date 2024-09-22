@@ -16,6 +16,7 @@ class User(Base):
     # Связь с параметрами и ордерами
     parameters = relationship("UserParameters", uselist=False, back_populates="user")
     orders = relationship("Order", back_populates="user")
+    balance = relationship("Balance", uselist=False, back_populates="user")
 
 class UserParameters(Base):
     __tablename__ = 'user_parameters'
@@ -59,3 +60,14 @@ class SubscriptionOrder(Base):
     order_id = Column(String)
     closed = Column(Boolean, default=False)
     description = Column(String)
+
+class Balance(Base):
+    __tablename__ = 'balances'
+
+    user_id = Column(BigInteger, ForeignKey('users.id'), primary_key=True)
+    btc_available = Column(Float, default=0.0)
+    btc_frozen = Column(Float, default=0.0)
+    usdt_available = Column(Float, default=10000.0)  # Начальный баланс для тестирования
+    usdt_frozen = Column(Float, default=0.0)
+
+    user = relationship("User", back_populates="balance")

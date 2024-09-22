@@ -32,7 +32,7 @@ async def api_key_received(message: types.Message, state: FSMContext):
     async with get_session() as session:
         user = await session.get(User, message.from_user.id)
         locale = load_locale(user.language)
-        if len(api_key) != 12:
+        if len(api_key) < 3 or len(api_key) > 30:
             await message.answer(locale["api_key_invalid"])
             return
         # Placeholder for API key validation

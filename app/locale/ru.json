@@ -11,9 +11,9 @@
     "subscription_thank_you": "Спасибо за приобретение подписки! Осталось дней: {days}",
     "subscription_expiring": "Ваша подписка заканчивается через {days} дней. Пожалуйста, продлите её.",
     "subscription_expired": "Ваша подписка истекла. Команды сброшены.",
-    "subscription_option_service": "С помощью стороннего сервиса",
-    "subscription_option_stars": "За счёт Telegram Stars",
-    "subscription_option_direct": "Прямая оплата",
+    "subscription_option_service": "Криптовалюты (50 USDT)",
+    "subscription_option_stars": "Telegram Stars (5,000 ⭐)",
+    "subscription_option_direct": "Прямая оплата (50 USDT)",
     "subscription_option_extend": "Продлить подписку",
     "welcome_back": "С возвращением!",
     "autobuy_message": "Плейсхолдер: Функция автопокупки ещё не реализована.",
@@ -28,5 +28,6 @@
     "buy_instruction": "Пожалуйста, введите сумму для покупки (в USDT).",
     "parameter_updated": "Параметр успешно обновлен.",
     "parameters_reset": "Параметры сброшены до значений по умолчанию.",
-    "parameters_prompt": "Параметры:\n1. Сумма покупки (USDT): {purchase_amount}\n2. Процент прибыли: {profit_percentage}%\n3. Задержка на закупку: {purchase_delay} секунд\n4. Процент роста курса: {growth_percentage}%\n5. Процент падения курса: {fall_percentage}%\n6. Автопокупка при росте: {autobuy_on_growth}\n7. Автопокупка при падении: {autobuy_on_fall}\n\nВведите номер параметра, который хотите изменить, или 'reset' для сброса до значений по умолчанию."
+    "parameters_prompt": "Параметры:\n1. Сумма покупки (USDT): {purchase_amount}\n2. Процент прибыли: {profit_percentage}%\n3. Задержка на закупку: {purchase_delay} секунд\n4. Процент роста курса: {growth_percentage}%\n5. Процент падения курса: {fall_percentage}%\n6. Автопокупка при росте: {autobuy_on_growth}\n7. Автопокупка при падении: {autobuy_on_fall}\n\nВведите номер параметра, который хотите изменить, или 'reset' для сброса до значений по умолчанию.",
+    "subscription_option_test": "Получить тестовую подписку"
 }

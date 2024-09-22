@@ -4,7 +4,7 @@ from aiogram import Router, types
 from aiogram.filters import Command
 from sqlalchemy import select
 
-from app.models import User, Order, UserParameters
+from app.models import User, Order, UserParameters, Balance
 from app.utils.locale import load_locale
 from app.utils.db import get_session
 from datetime import datetime, timedelta
@@ -170,24 +170,57 @@ async def cmd_autobuy(message: types.Message):
         user = await session.get(User, message.from_user.id)
         # Получаем параметры автоторговли
         if not user.parameters:
-            # Если параметров нет, создаем со значениями по умолчанию
             params = UserParameters(user_id=user.id)
             session.add(params)
             await session.commit()
         else:
             params = user.parameters
-        # Эмулируем запуск или остановку автоторговли
+        locale = load_locale(user.language)
+        # Отображаем состояние автоторговли и текущие параметры
+        autobuy_status = 'Running' if params.autobuy_on_growth or params.autobuy_on_fall else 'Stopped'
+        message_text = f"Autotrading cycle is currently: {autobuy_status}\n\nCurrent parameters:\nPurchase amount: {params.purchase_amount} USDT\nProfit percentage: {params.profit_percentage}%\nPurchase delay: {params.purchase_delay} seconds\nGrowth percentage: {params.growth_percentage}%\nFall percentage: {params.fall_percentage}%"
+        await message.answer(message_text, reply_markup=autobuy_keyboard(params))
+
+def autobuy_keyboard(params):
+    buttons = []
+    if params.autobuy_on_growth or params.autobuy_on_fall:
+        buttons.append([types.InlineKeyboardButton(text="Stop", callback_data="autobuy_stop")])
+    else:
+        buttons.append([types.InlineKeyboardButton(text="Start", callback_data="autobuy_start")])
+    buttons.append([types.InlineKeyboardButton(text="Change parameters", callback_data="change_params")])
+    return types.InlineKeyboardMarkup(inline_keyboard=buttons)
+
+@router.callback_query(lambda c: c.data == 'autobuy_start')
+async def process_autobuy_start(callback_query: types.CallbackQuery):
+    async with get_session() as session:
+        user = await session.get(User, callback_query.from_user.id)
+        params = user.parameters
+        # Запускаем автоторговлю
+        params.autobuy_on_growth = True
+        params.autobuy_on_fall = True
+        await session.commit()
+        await callback_query.message.answer("Autotrading cycle started.")
+    await callback_query.answer()
+
+@router.callback_query(lambda c: c.data == 'autobuy_stop')
+async def process_autobuy_stop(callback_query: types.CallbackQuery):
+    async with get_session() as session:
+        user = await session.get(User, callback_query.from_user.id)
+        params = user.parameters
         if params.autobuy_on_growth or params.autobuy_on_fall:
-            # Останавливаем автоторговлю
             params.autobuy_on_growth = False
             params.autobuy_on_fall = False
             await session.commit()
-            await message.answer("Autotrading cycle stopped.")
+            await callback_query.message.answer("Autotrading cycle stopped.")
         else:
-            # Запускаем автоторговлю
-            params.autobuy_on_growth = True  # Можно уточнить, какие режимы включать
-            await session.commit()
-            await message.answer("Autotrading cycle started.")
+            await callback_query.message.answer("Autotrading cycle is not running.")
+    await callback_query.answer()
+
+@router.callback_query(lambda c: c.data == 'change_params')
+async def process_change_params(callback_query: types.CallbackQuery, state: FSMContext):
+    # Перенаправляем в команду /params
+    await cmd_params(callback_query.message, state)
+    await callback_query.answer()
 
 @router.message(Command('params'))
 async def cmd_params(message: types.Message, state: FSMContext):
@@ -262,6 +295,139 @@ async def process_new_value(message: types.Message, state: FSMContext):
         except ValueError:
             await message.answer("Invalid value. Please enter a valid number.")
     await state.clear()
+
+@router.message(Command('stop'))
+async def cmd_stop(message: types.Message):
+    async with get_session() as session:
+        user = await session.get(User, message.from_user.id)
+        params = user.parameters
+        if params.autobuy_on_growth or params.autobuy_on_fall:
+            params.autobuy_on_growth = False
+            params.autobuy_on_fall = False
+            await session.commit()
+            await message.answer("Autotrading cycle stopped.")
+        else:
+            await message.answer("Autotrading cycle is not running.")
+
+@router.message(Command('stats'))
+async def cmd_stats(message: types.Message):
+    await message.answer("Select the time period:", reply_markup=stats_period_keyboard())
+
+def stats_period_keyboard():
+    buttons = [
+        [types.InlineKeyboardButton(text="Daily", callback_data="stats_daily")],
+        [types.InlineKeyboardButton(text="Monthly", callback_data="stats_monthly")],
+        [types.InlineKeyboardButton(text="Full", callback_data="stats_full")]
+    ]
+    return types.InlineKeyboardMarkup(inline_keyboard=buttons)
+
+@router.callback_query(lambda c: c.data.startswith('stats_'))
+async def process_stats_period(callback_query: types.CallbackQuery):
+    period = callback_query.data.split('_')[1]
+    async with get_session() as session:
+        user = await session.get(User, callback_query.from_user.id)
+        now = datetime.utcnow()
+        if period == 'daily':
+            start_time = now - timedelta(days=1)
+            period_text = "Daily"
+        elif period == 'monthly':
+            start_time = now - timedelta(days=30)
+            period_text = "Monthly"
+        else:
+            start_time = datetime.min
+            period_text = "Full"
+        # Получаем количество сделок и прибыль
+        trades = await session.execute(
+            select(Order).where(Order.user_id == user.id, Order.date_created >= start_time)
+        )
+        trades = trades.scalars().all()
+        num_trades = len(trades)
+        total_profit = 0.0  # Вы можете реализовать расчет прибыли по своим данным
+        stats_text = f"Time period: {period_text}\nNumber of trades: {num_trades}\nProfit: {total_profit} USDT"
+        await callback_query.message.answer(stats_text)
+    await callback_query.answer()
+
+@router.message(Command('balance'))
+async def cmd_balance(message: types.Message):
+    async with get_session() as session:
+        user = await session.get(User, message.from_user.id)
+        # Получаем баланс
+        if not user.balance:
+            balance = Balance(user_id=user.id)
+            session.add(balance)
+            await session.commit()
+        else:
+            balance = user.balance
+        # Рассчитываем общие суммы
+        orders_pending_execution = balance.usdt_frozen
+        available_balance = balance.usdt_available
+        total_balance = orders_pending_execution + available_balance
+
+        balance_text = "Balance:\n\nCryptocurrencies:\n"
+        balance_text += f"- Bitcoin: Available: {balance.btc_available} BTC, Frozen: {balance.btc_frozen} BTC\n"
+        balance_text += f"- USDT: Available: {balance.usdt_available} USDT, Frozen: {balance.usdt_frozen} USDT\n\n"
+        balance_text += "Sum of funds:\n"
+        balance_text += f"- Orders pending execution: {orders_pending_execution} USDT\n"
+        balance_text += f"- Available balance: {available_balance} USDT\n"
+        balance_text += f"- Total amount: {total_balance} USDT"
+        await message.answer(balance_text)
+
+@router.message(Command('price'))
+async def cmd_price(message: types.Message):
+    # Эмулируем текущую цену
+    current_price = 50000  # Задержанная цена для тестирования
+    await message.answer(f"Current asset price:\n- BTC/USDT: {current_price} USDT")
+
+class HelpStates(StatesGroup):
+    viewing_help = State()
+
+help_pages = {
+    'en': [
+        "Help Page 1: Overview\n\nThis bot allows you to trade BTC/USDT automatically, create orders, view balance, statistics, and more.",
+        "Help Page 2: Commands\n\n/autobuy - Start or stop autotrading\n/buy - Purchase cryptocurrency\n/orders - View open orders\n/params - Set autotrading parameters\n/stop - Stop autotrading\n/stats - View statistics\n/balance - View balance\n/price - View current price\n/subscription - Manage your subscription\n/help - View help pages",
+        "Help Page 3: FAQ\n\nQ: How do I start trading?\nA: First, purchase a subscription via /subscription, then set your parameters via /params, and start autotrading with /autobuy."
+    ],
+    'ru': [
+        "Страница помощи 1: Обзор\n\nЭтот бот позволяет автоматически торговать парой BTC/USDT, создавать ордера, просматривать баланс, статистику и многое другое.",
+        "Страница помощи 2: Команды\n\n/autobuy - Запустить или остановить автоторговлю\n/buy - Купить криптовалюту\n/orders - Просмотреть открытые ордера\n/params - Настроить параметры автоторговли\n/stop - Остановить автоторговлю\n/stats - Просмотреть статистику\n/balance - Просмотреть баланс\n/price - Просмотреть текущую цену\n/subscription - Управлять подпиской\n/help - Просмотреть страницы помощи",
+        "Страница помощи 3: Часто задаваемые вопросы\n\nВ: Как начать торговлю?\nО: Сначала приобретите подписку через /subscription, затем настройте параметры через /params и запустите автоторговлю с помощью /autobuy."
+    ]
+}
+
+@router.message(Command('help'))
+async def cmd_help(message: types.Message, state: FSMContext):
+    async with get_session() as session:
+        user = await session.get(User, message.from_user.id)
+        language = user.language or 'en'
+        page = 0
+        await state.update_data(help_page=page)
+        await message.answer(help_pages[language][page], reply_markup=help_keyboard(page, language))
+        await state.set_state(HelpStates.viewing_help)
+
+def help_keyboard(page, language):
+    buttons = []
+    if page > 0:
+        buttons.append(types.InlineKeyboardButton(text="Previous", callback_data=f"help_prev_{page}"))
+    if page < len(help_pages[language]) - 1:
+        buttons.append(types.InlineKeyboardButton(text="Next", callback_data=f"help_next_{page}"))
+    return types.InlineKeyboardMarkup(inline_keyboard=[buttons])
+
+@router.callback_query(HelpStates.viewing_help, lambda c: c.data.startswith('help_'))
+async def process_help_pagination(callback_query: types.CallbackQuery, state: FSMContext):
+    action, direction, current_page = callback_query.data.split('_')
+    current_page = int(current_page)
+    if direction == 'next':
+        new_page = current_page + 1
+    elif direction == 'prev':
+        new_page = current_page - 1
+    else:
+        new_page = current_page
+    async with get_session() as session:
+        user = await session.get(User, callback_query.from_user.id)
+        language = user.language or 'en'
+        await state.update_data(help_page=new_page)
+        await callback_query.message.edit_text(help_pages[language][new_page], reply_markup=help_keyboard(new_page, language))
+    await callback_query.answer()
 
 def register_command_handlers(dp):
     dp.include_router(router)
