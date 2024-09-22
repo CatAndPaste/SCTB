@@ -309,8 +309,27 @@ async def process_autobuy_stop(callback_query: types.CallbackQuery):
 
 @router.callback_query(lambda c: c.data == 'change_params')
 async def process_change_params(callback_query: types.CallbackQuery, state: FSMContext):
-    # Redirect to /params command
-    await cmd_params(callback_query.message, state)
+    async with get_session() as session:
+        result = await session.execute(
+            select(User)
+            .options(selectinload(User.parameters))
+            .where(User.id == callback_query.from_user.id)
+        )
+        user = result.scalar_one_or_none()
+        if not user:
+            await callback_query.message.message.answer("User not found. Please use /start to register.")
+            return
+        # Get parameters
+        if not user.parameters:
+            params = UserParameters(user_id=user.id)
+            session.add(params)
+            await session.commit()
+        else:
+            params = user.parameters
+        # Display current parameters
+        params_text = f"Parameters:\n1. Purchase amount (USDT): {params.purchase_amount}\n2. Profit percentage: {params.profit_percentage}%\n3. Purchase delay: {params.purchase_delay} seconds\n4. Growth percentage: {params.growth_percentage}%\n5. Fall percentage: {params.fall_percentage}%\n6. Autobuy on growth: {'Enabled' if params.autobuy_on_growth else 'Disabled'}\n7. Autobuy on fall: {'Enabled' if params.autobuy_on_fall else 'Disabled'}\n\nEnter the number of the parameter you want to change, or type 'reset' to reset to default."
+        await callback_query.message.answer(params_text)
+        await state.set_state(ParamsStates.waiting_for_param_choice)
     await callback_query.answer()
 
 @router.message(Command('params'))
