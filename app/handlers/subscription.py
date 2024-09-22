@@ -1,14 +1,27 @@
-# app/handlers/subscription.py
-
 from aiogram import Router, types
 from aiogram.filters import Command
+from aiogram.filters.callback_data import CallbackData
 from datetime import datetime, timedelta
+
+from aiogram.utils.formatting import Text
+
 from app.models import User
 from app.utils.locale import load_locale
 from app.utils.db import get_session
 from app.utils.commands import set_user_commands
 
 router = Router()
+
+@router.message(Command('subscription'))
+async def cmd_subscription(message: types.Message):
+    async with get_session() as session:
+        user = await session.get(User, message.from_user.id)
+        locale = load_locale(user.language)
+        if user.subscription and user.subscription_expires > datetime.utcnow():
+            remaining_days = (user.subscription_expires - datetime.utcnow()).days
+            await message.answer(locale["subscription_active"].format(days=remaining_days), reply_markup=subscription_keyboard(user.language, renew=True))
+        else:
+            await message.answer(locale["subscription_inactive"], reply_markup=subscription_keyboard(user.language))
 
 def subscription_keyboard(language_code, renew=False):
     locale = load_locale(language_code)
