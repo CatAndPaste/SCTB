@@ -263,3 +263,5 @@ async def process_new_value(message: types.Message, state: FSMContext):
             await message.answer("Invalid value. Please enter a valid number.")
     await state.clear()
 
+def register_command_handlers(dp):
+    dp.include_router(router)
