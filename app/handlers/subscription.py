@@ -51,3 +51,6 @@ async def subscription_callback(callback_query: types.CallbackQuery):
             user.subscription = True
             await set_user_commands(callback_query.bot, user.id, user.language, user.subscription)
     await callback_query.answer()
+
+def register_subscription_handlers(dp):
+    dp.include_router(router)
