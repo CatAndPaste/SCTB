@@ -49,7 +49,8 @@ def subscription_keyboard(language_code):
     buttons = [
         [types.InlineKeyboardButton(text=locale["subscription_option_service"], callback_data="subscribe_service")],
         [types.InlineKeyboardButton(text=locale["subscription_option_stars"], callback_data="subscribe_stars")],
-        [types.InlineKeyboardButton(text=locale["subscription_option_direct"], callback_data="subscribe_direct")]
+        [types.InlineKeyboardButton(text=locale["subscription_option_direct"], callback_data="subscribe_direct")],
+        [types.InlineKeyboardButton(text=locale["subscription_option_test"], callback_data="subscribe_test")],
     ]
     return types.InlineKeyboardMarkup(inline_keyboard=buttons)
 

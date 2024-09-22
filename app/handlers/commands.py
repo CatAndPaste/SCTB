@@ -27,7 +27,7 @@ async def cmd_buy(message: types.Message, state: FSMContext):
         user = await session.get(User, message.from_user.id)
         locale = load_locale(user.language)
         # Отображаем инструкцию и текущий баланс
-        balance_text = f"Available USDT: 10000\nCurrent Price: 50000 USDT/BTC"  # Используем фиктивные данные
+        balance_text = f"Test only.\nAvailable USDT: 10000\nCurrent Price: 50000 USDT/BTC"  # Используем фиктивные данные
         await message.answer(f"{locale.get('buy_instruction', 'Please enter the amount to buy in USDT.')}\n\n{balance_text}")
         await state.set_state(BuyStates.waiting_for_amount)
 
