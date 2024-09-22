@@ -42,8 +42,8 @@ async def set_default_commands(bot):
     """
     Устанавливает команды по умолчанию для всех пользователей.
     """
-    await bot.set_my_commands(default_commands_en, scope=BotCommandScopeDefault(), language_code='en')
     await bot.set_my_commands(default_commands_ru, scope=BotCommandScopeDefault(), language_code='ru')
+    await bot.set_my_commands(default_commands_en, scope=BotCommandScopeDefault())
 
 async def set_user_commands(bot, user_id, language_code, has_subscription):
     """
@@ -56,4 +56,4 @@ async def set_user_commands(bot, user_id, language_code, has_subscription):
     else:
         commands = default_commands_ru if language_code == 'ru' else default_commands_en
     scope = BotCommandScopeChat(chat_id=user_id)
-    await bot.set_my_commands(commands=commands, scope=scope, language_code=language_code)
+    await bot.set_my_commands(commands=commands, scope=scope)
